@@ -48,7 +48,10 @@ add_zone () {
 
 
 	debug && echo "add_zone: name: ${proj} data: ${zone_name}"
-	proj_defs["${proj}"]=$zone_name
+	proj_defs["${proj}"]="__$zone_name"
+
+	# copy local definition into global and add namespacing
+	tmpdef=$(declare -p $zone_name) && declare -g -A "__$zone_name"="${tmpdef#*=}"
 
 	for service in "$@";
 	do
@@ -67,11 +70,11 @@ add_tunnel_definitions() {
 
 	DEFS=0
 
-	for f in $(ls ${tunnel_def_dir});
+	for f in $(ls ${tunnel_def_dir}/*.def);
 	do
 		debug && echo "tunnel_definitions: Adding definition: $f"
 		((DEFS++))
-		. ./${tunnel_def_dir}/${f}
+		. ${f}
 	done
 
 	if [[ $DEFS == 0 ]]; then
@@ -138,6 +141,9 @@ run_cmds () {
 
 			zone=${proj_ref[zone]}
 			proj_name=${proj_ref[name]}
+            username=${proj_ref[username]}
+            keyfile=${proj_ref[keyfile]}
+            echo "Zone $proj_ref_name ${proj_ref[@]}"
 
 			if [ ! -v $PROJ_FILTER ]; then
 				if [  ! "$PROJ_FILTER" == "$proj" ]; then
@@ -178,7 +184,7 @@ run_cmds () {
 			if [ ! -v $CREATE_TUNNEL ]; then
 				(( ran++ ))
 				echo "all_tunnels: Creating tunnel for $name on $system in $sysshort"
-				./gssh-tunnel.sh -p $proj_name -z $zone -r $sp -l $lp -i $system -b
+				./gssh-tunnel.sh -p $proj_name -z $zone -r $sp -l $lp -i $system -u $username -k $keyfile -b
 			fi
 
 

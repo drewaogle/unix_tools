@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo "Running gssh-tunnel.sh"
+echo "Running gssh-tunnel.sh $*"
  
 Usage() {
-    echo -e "Usage: $(basename $0) -p PROJECT -z ZONE -r REMOTE_PORT -l LOCAL_PORT -i INSTANCE_NAME -u USERNAME -k KEYFILE[-b]"
+    echo -e "Usage: $(basename $0) -p PROJECT -z ZONE -r REMOTE_PORT -l LOCAL_PORT -i INSTANCE_NAME -u USERNAME -k KEYFILE [-b]"
     echo -e "     : -b makes it to run in background [optional]"
     exit 1
 }
@@ -11,7 +11,7 @@ Usage() {
 if [[ $# -eq 0 ]] ; then
     Usage
 fi
-while getopts "hp:z:r:l:i:b:u:k" opt; do
+while getopts "hp:z:r:l:i:bu:k:" opt; do
   case "$opt" in
     p)
       PROJECT="${OPTARG}";;
