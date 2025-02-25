@@ -12,9 +12,10 @@ tunnel_def_dir=${ALL_TUNNELS_DIR:=$(realpath $(dirname "$0")/"tunnel-definitions
 
 add_service () {
 	local -n svc_rec=$1
-	local proj=${svc_rec[proj]}
+	local proj=$3
 	global_name=projs_${proj}
 	svc_rec["zone"]=$2
+	svc_rec["proj"]=$3
 
 	if [[ -z "${projs[${proj}]}" ]]; then
 		debug && echo "add_service: creating proj info for ${proj}"
@@ -56,7 +57,7 @@ add_zone () {
 
 	for service in "$@";
 	do
-		add_service $service $zone
+		add_service $service $zone $proj
 	done
 }
 
@@ -78,14 +79,11 @@ add_tunnel_definitions() {
 	done
 
 	if [[ $DEFS == 0 ]]; then
+        # not much point in running with no services
 		echo "FATAL: no definitions loaded for configuration"
+        exit 2
 	fi
-	debug && echo "Done"
 }
-
-# includes service definitions here
-add_tunnel_definitions
-
 
 # functions for executing user comands 
 check_gcp_login() {
@@ -167,7 +165,7 @@ run_cmds () {
 			fi
 
 			if [ ! -v $DISPLAY_INFO ]; then
-				echo "Service: $name Host: $system Service Port: $sp Local Port: $lp" #$single - $svc $system $name"
+				echo "Name: $sysshort Service: $name Host: $system Service Port: $sp Local Port: $lp"
 				#echo "$single - $svc $system $name"
 			fi
 
@@ -194,6 +192,10 @@ run_cmds () {
 	fi
 }
 
+## main execution
+
+# add tunnel definitions
+add_tunnel_definitions
 # parse user commands
 
 set -o errexit
