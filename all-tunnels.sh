@@ -5,7 +5,8 @@
 DEBUG=0
 debug() (( $DEBUG ))
 
-tunnel_def_dir="tunnel-definitions"
+# location of defintions; one or more files with the suffix '.def' - shell  script 'parts' that use add_zone. 
+tunnel_def_dir=${ALL_TUNNELS_DIR:=$(realpath $(dirname "$0")/"tunnel-definitions")}
 
 # functions for defining services
 
@@ -60,7 +61,6 @@ add_zone () {
 }
 
 
-tunnel_def_dir="tunnel-definitions"
 
 add_tunnel_definitions() {
 	if [ ! -d "$tunnel_def_dir" ]; then
@@ -122,8 +122,7 @@ run_cmds () {
 		for svc in "${proj_rf[@]}"
 		do
 			local -n svr_rec=$svc
-			#printf -v fmtStr '[%s]=%%q  ' "${!svr_rec[@]}";printf "$fmtStr" "${svr_rec[@]}"
-			#echo "Sevice: ${svr_rec[@]}"
+			debug && ( printf -v fmtStr '[%s]=%%q  ' "${!svr_rec[@]}";printf "run: svc $fmtStr\n" "${svr_rec[@]}" )
 			system=${svr_rec[system]}
 			sysshort=${svr_rec[sysshort]}
 			name=${svr_rec[name]}
@@ -136,14 +135,13 @@ run_cmds () {
 
 			local proj_key="${proj}"
 			proj_ref_name=${proj_defs[${proj_key}]}
-			#echo "PRN $proj_ref_name ${proj_key}"
 			local -n proj_ref=$proj_ref_name
 
 			zone=${proj_ref[zone]}
 			proj_name=${proj_ref[name]}
             username=${proj_ref[username]}
             keyfile=${proj_ref[keyfile]}
-            echo "Zone $proj_ref_name ${proj_ref[@]}"
+            debug && echo "run: Zone $proj_ref_name ${proj_ref[@]}"
 
 			if [ ! -v $PROJ_FILTER ]; then
 				if [  ! "$PROJ_FILTER" == "$proj" ]; then
