@@ -7,6 +7,8 @@ debug() (( $DEBUG ))
 
 # location of defintions; one or more files with the suffix '.def' - shell  script 'parts' that use add_zone. 
 tunnel_def_dir=${ALL_TUNNELS_DIR:=$(realpath $(dirname "$0")/"tunnel-definitions")}
+# location of tunnel creator scripts
+helper_dir=${ALL_TUNNEL_HELPER_DIR:=$((realpath $(dirname "$0"))
 
 # functions for defining services
 
@@ -180,7 +182,7 @@ run_cmds () {
 			if [ ! -v $CREATE_TUNNEL ]; then
 				(( ran++ ))
 				echo "all_tunnels: Creating tunnel for $name on $system in $sysshort"
-				./gssh-tunnel.sh -p $proj_name -z $zone -r $sp -l $lp -i $system -u $username -k $keyfile -b
+				${helper_dir}/gssh-tunnel.sh -p $proj_name -z $zone -r $sp -l $lp -i $system -u $username -k $keyfile -b
 			fi
 
 
