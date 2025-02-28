@@ -12,10 +12,26 @@ helper_dir=${ALL_TUNNEL_HELPER_DIR:=$(realpath $(dirname "$0"))}
 
 # functions for defining services
 
+test_keys_or_die() {
+    local fname=$1
+    local where=$2
+    local -n aarray=$3
+    shift 3;
+    while [ $# -gt 0 ] ;
+    do
+        if [[ ! -v "aarray[$1]" ]]; then
+            echo "$fname: missing requires key $1 $where"
+            exit 2
+        fi
+        shift
+    done
+}
+
 add_service () {
 	local -n svc_rec=$1
 	local proj=$3
 	global_name=projs_${proj}
+    test_keys_or_die "add_service" "in service record for $1" svc_rec sysshort system name service_port local_port
 	svc_rec["zone"]=$2
 	svc_rec["proj"]=$3
 
@@ -40,6 +56,8 @@ add_zone () {
 	shift
 
 	local -n zone_rec=$zone_name
+    test_keys_or_die "add_zone" "in zone record for $zone_name" zone_rec proj zone username keyfile
+
 	local proj=${zone_rec[proj]}
 	local zone=${zone_rec[zone]}
 
