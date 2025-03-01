@@ -7,11 +7,12 @@ Usage() {
     echo -e "     : -b makes it to run in background [optional]"
     exit 1
 }
- 
+
+unset USE_LOCALHOST
 if [[ $# -eq 0 ]] ; then
     Usage
 fi
-while getopts "hp:z:r:l:i:bu:k:" opt; do
+while getopts "hp:z:r:l:i:bu:k:L" opt; do
   case "$opt" in
     p)
       PROJECT="${OPTARG}";;
@@ -29,11 +30,18 @@ while getopts "hp:z:r:l:i:bu:k:" opt; do
      KEYFILE="${OPTARG}";;
     u)
      USERNAME="${OPTARG}";;
+    L)
+     USE_LOCALHOST=1;;
     h|*)
       Usage;;
   esac
 done
- 
+
+if [[ $USE_LOCALHOST ]]; then
+	SERVICE_HOST=localhost
+else
+	SERVICE_HOST=$INSTANCE_NAME
+fi
  
 # default to current project
 if [ -z ${PROJECT} ]; then
@@ -48,8 +56,8 @@ if [ -z "$PROJECT" ] || [ -z "$ZONE" ] || [ -z "$REMOTE_PORT" ] || [ -z "$LOCAL_
 fi
 
 if [ -z "$BGND" ]; then
-    echo gcloud compute ssh --ssh-key-file="${KEYFILE}" --project=${PROJECT} --zone=${ZONE} $USERNAME@$INSTANCE_NAME --tunnel-through-iap --ssh-flag="-L ${LOCAL_PORT}:${INSTANCE_NAME}:${REMOTE_PORT} -N"
-    gcloud compute ssh --ssh-key-file="${KEYFILE}" --project=${PROJECT} --zone=${ZONE} $USERNAME@$INSTANCE_NAME --tunnel-through-iap --ssh-flag="-L ${LOCAL_PORT}:${INSTANCE_NAME}:${REMOTE_PORT} -N"
+    echo gcloud compute ssh --ssh-key-file="${KEYFILE}" --project=${PROJECT} --zone=${ZONE} $USERNAME@$INSTANCE_NAME --tunnel-through-iap --ssh-flag="-L ${LOCAL_PORT}:${SERVICE_HOST}:${REMOTE_PORT} -N"
+    gcloud compute ssh --ssh-key-file="${KEYFILE}" --project=${PROJECT} --zone=${ZONE} $USERNAME@$INSTANCE_NAME --tunnel-through-iap --ssh-flag="-L ${LOCAL_PORT}:${SERVICE_HOST}:${REMOTE_PORT} -N"
 else
-    gcloud compute ssh --ssh-key-file="${KEYFILE}" --project=${PROJECT} --zone=${ZONE} $USERNAME@$INSTANCE_NAME --tunnel-through-iap --ssh-flag="-n" --ssh-flag="-L ${LOCAL_PORT}:${INSTANCE_NAME}:${REMOTE_PORT} -fN"
+    gcloud compute ssh --ssh-key-file="${KEYFILE}" --project=${PROJECT} --zone=${ZONE} $USERNAME@$INSTANCE_NAME --tunnel-through-iap --ssh-flag="-n" --ssh-flag="-L ${LOCAL_PORT}:${SERVICE_HOST}:${REMOTE_PORT} -fN"
 fi

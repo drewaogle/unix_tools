@@ -150,6 +150,15 @@ run_cmds () {
 			zone=${svr_rec[zone]}
 
 
+			extra_args=()
+
+			if [[ -v "svr_rec[use_lh]" ]]; then
+				echo "!! EA"
+				extra_args+=("-L")
+			fi
+
+
+
 
 			local proj_key="${proj}"
 			proj_ref_name=${proj_defs[${proj_key}]}
@@ -200,7 +209,7 @@ run_cmds () {
 			if [ ! -v $CREATE_TUNNEL ]; then
 				(( ran++ ))
 				echo "all_tunnels: Creating tunnel for $name on $system in $sysshort"
-				${helper_dir}/gssh-tunnel.sh -p $proj_name -z $zone -r $sp -l $lp -i $system -u $username -k $keyfile -b
+				${helper_dir}/gssh-tunnel.sh -p $proj_name -z $zone -r $sp -l $lp -i $system -u $username -k $keyfile -b "${extra_args[@]}"
 			fi
 
 
