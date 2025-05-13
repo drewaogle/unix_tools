@@ -1,0 +1,26 @@
+#part.rust_path - adds rust installed in paths
+
+DEBUG=
+debug() {
+    declare -p "DEBUG" &>/dev/null
+}
+
+NAME=$(basename $0)
+debug && echo "Debugging $0"
+
+if [[ $# < 2 ]]; then
+    echo "$NAME: needs 2 arguments: cargo path and rustup path"
+    exit 1
+fi
+
+CARGO_HOME=$1
+RUSTUP_HOME=$2
+
+CARGO_BIN_PATH=${CARGO_HOME}/bin
+
+debug && echo "$NAME: CARGO bin = $CARGO_BIN_PATH"
+debug && echo "$NAME: RUSTUP home = $RUSTUP_HOME"
+export PATH="$CARGO_BIN_PATH:$PATH"
+# https://github.com/rust-lang/rustup/issues/618
+export RUSTUP_HOME
+export CARGO_HOME
