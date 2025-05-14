@@ -1,0 +1,32 @@
+#part.go_path - adds go installed in paths
+
+DEBUG=
+debug() {
+    declare -p "DEBUG" &>/dev/null
+}
+
+NAME=$(basename ${BASH_SOURCE[0]})
+debug && echo "Debugging $NAME"
+
+if [[ $# < 2 || $# > 3 ]]; then
+    echo "$NAME: needs 2 arguments: go executables path and app install path"
+    echo "$NAME: can also add go path as 3rd"
+    return
+fi
+
+GO_ROOT=$1
+GO_APP_ROOT=$2
+
+PATH_SET=0
+if [ $# -eq 3 ]; then GOPATH=$3 PATH_SET=1; fi
+if [ $# -eq 3 ]; then echo "SET?"; fi
+
+GO_EXE_PATH=${GO_ROOT}/bin
+GOBIN=${GO_APP_ROOT}
+
+debug && echo "$NAME: GO tool path = $GO_EXE_PATH"
+debug && echo "$NAME: GO app path = $GOBIN"
+debug && [ $PATH_SET -eq 1 ] && echo "$NAME: GO dev path = $GOPATH"
+export PATH="$GO_EXE_PATH:$GOBIN:$PATH"
+#https://pkg.go.dev/cmd/go#hdr-Environment_variables
+export GOBIN

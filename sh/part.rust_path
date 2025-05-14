@@ -1,12 +1,12 @@
 #part.rust_path - adds rust installed in paths
 
-DEBUG=
+#DEBUG=
 debug() {
-    declare -p "DEBUG" &>/dev/null
+    declare -p "$DEBUG" &>/dev/null
 }
 
-NAME=$(basename $0)
-debug && echo "Debugging $0"
+NAME=$(basename ${BASH_SOURCE[0]})
+debug && echo "Debugging $NAME"
 
 if [[ $# < 2 ]]; then
     echo "$NAME: needs 2 arguments: cargo path and rustup path"

@@ -1,0 +1,17 @@
+#part.path_subdirs - all all subdirs to path
+
+DEBUG=
+
+if [  $# -eq 0 ]; then
+    echo "No parameter (need path)"
+    exit 0
+fi
+
+for D in $(ls "$1"); do
+    A=$(realpath "$1/$D")
+    if [ -d "${A}" ]; then
+        if [ -n "$DEBUG" ]; then  echo $A; fi
+        PATH="$PATH:${A}"
+    fi
+done
+if [ -n "$DEBUG" ]; then echo "New Path =  $PATH"; fi
