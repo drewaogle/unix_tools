@@ -1,8 +1,8 @@
 #part.rust_path - adds rust installed in paths
 
-#DEBUG=
+#SHELL_DEBUG=
 debug() {
-    declare -p "$DEBUG" &>/dev/null
+    declare -p "SHELL_DEBUG" &>/dev/null
 }
 
 NAME=$(basename ${BASH_SOURCE[0]})
