@@ -1,6 +1,6 @@
 #part.go_path - adds go installed in paths
 
-DEBUG=
+#DEBUG=
 debug() {
     declare -p "DEBUG" &>/dev/null
 }
