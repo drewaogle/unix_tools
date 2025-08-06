@@ -1,0 +1,135 @@
+#!/bin/bash
+ENVDIR=${ENVDIR-"/code/py_env"}
+VERBS="ls go stop"
+
+SOURCED=1
+if [ "$0" = "$BASH_SOURCE" ]; then
+    SOURCED=0
+fi
+
+function sourced()
+{
+    return $SOURCED
+}
+
+function list_verbs()
+{
+    for v in $VERBS;
+    do
+        echo -n " $v"
+    done
+    echo ""
+    return 0
+}
+
+function verify_verb()
+{
+    FOUND=1
+    for v in $VERBS; do
+        if [ "$v" = "$1" ]; then
+            FOUND=0
+            break
+        fi
+    done
+    return $FOUND
+}
+
+function err()
+{
+    echo "ERR: $1"
+    return 1
+}
+
+function can_exit
+{
+    if  sourced ; then
+        exit $1
+    fi
+    return 1
+}
+
+if [ "$#" -lt 1 ]; then
+    echo -n "Can't run, need a verb:"
+    list_verbs
+    can_exit 1 || return 1
+fi
+
+function get_envs()
+{
+    if [ ! -d "$ENVDIR" ]; then
+        echo "Configuration Error: can't find \$ENVDIR ($ENVDIR)"
+        return 1
+    fi
+    DIRS=$(find $ENVDIR -maxdepth 1 -type d)
+    for d in $DIRS;
+    do
+        echo $(basename $d)
+    done
+    return 0
+}
+
+function has_args()
+{
+    [ $1 -eq $2 ]
+    return $?
+}
+
+
+function do_ls()
+{
+    has_args 0 $# || err "ls: Needs 0 args" || can_exit 1 || return 1
+
+    e=$(get_envs)
+    r=$?
+    if [ $r -ne 0 ]; then
+        echo "ls: $e"
+        ( sourced && exit 1 ) || return 1
+    fi
+    echo "Environments:"
+    for se in $e; do
+        echo " * $se"
+    done
+    return 0
+}
+
+function do_go()
+{
+    has_args 1 $# || err "go: Needs 1 arg" || can_exit 1 || return 1
+    e=$(get_envs)
+    r=$?
+    if [ $r -ne 0 ]; then
+        echo "go: $e"
+        can_exit 1 || return 1
+    fi
+
+    FOUND=0
+    for se in $e; do
+        if [ $1 = $se ]; then
+            FOUND=1
+            break
+        fi
+    done
+    if [ $FOUND -eq 0 ]; then
+        err "go: No such env as $1" || can_exit 1 || return 1
+    fi
+    ex="$ENVDIR/$1/bin/activate"
+    echo "$ex"
+    . $ex
+    return $?
+}
+
+function do_stop()
+{
+    print "STOP"
+}
+
+verify_verb $1 ||  exit 1
+declare -A verb_actions=(
+    ["ls"]="do_ls"
+    ["go"]="do_go"
+    ["stop"]="do_stop")
+
+cmd="${verb_actions[$1]}"
+shift
+eval "$cmd $*"
+can_exit $? || return $?
