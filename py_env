@@ -31,6 +31,9 @@ function verify_verb()
             break
         fi
     done
+    if [ $FOUND -eq 1 ]; then
+        echo " No verb for $1"
+    fi
     return $FOUND
 }
 
@@ -123,7 +126,7 @@ function do_stop()
     print "STOP"
 }
 
-verify_verb $1 ||  exit 1
+verify_verb $1 || can_exit 1 ||  return 1
 declare -A verb_actions=(
     ["ls"]="do_ls"
     ["go"]="do_go"
