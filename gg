@@ -1,0 +1,86 @@
+#!/bin/bash
+# gg - go places I use
+VERBS="docs ls"
+
+SOURCED=1
+if [ "$0" = "$BASH_SOURCE" ]; then
+    SOURCED=0
+fi
+
+function sourced()
+{
+    return $SOURCED
+}
+
+function list_verbs()
+{
+    for v in $VERBS;
+    do
+        echo -n " $v"
+    done
+    echo ""
+    return 0
+}
+
+function verify_verb()
+{
+    FOUND=1
+    for v in $VERBS; do
+        if [ "$v" = "$1" ]; then
+            FOUND=0
+            break
+        fi
+    done
+    if [ $FOUND -eq 1 ]; then
+        echo " No verb for $1"
+    fi
+    return $FOUND
+}
+
+function err()
+{
+    echo "ERR: $1"
+    return 1
+}
+
+function can_exit
+{
+    if  sourced ; then
+        exit $1
+    fi
+    return 1
+}
+
+if [ "$#" -lt 1 ]; then
+    echo -n "Can't run, need a verb:"
+    list_verbs
+    can_exit 1 || return 1
+fi
+
+
+function has_args()
+{
+    [ $1 -eq $2 ]
+    return $?
+}
+
+function do_ls()
+{
+    list_verbs
+}
+
+function do_docs()
+{
+    cd "$HOME/win/Documents/repo"
+}
+
+
+verify_verb $1 || can_exit 1 ||  return 1
+declare -A verb_actions=(
+    ["ls"]="do_ls"
+    ["docs"]="do_docs")
+
+cmd="${verb_actions[$1]}"
+shift
+eval "$cmd $*"
+can_exit $? || return $?
